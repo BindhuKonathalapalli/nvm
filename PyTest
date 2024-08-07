@@ -1,0 +1,120 @@
+import json
+import os
+
+data_file = 'sat_results.json'
+
+# Load data from file
+if os.path.exists(data_file):
+    with open(data_file, 'r') as file:
+        data = json.load(file)
+else:
+    data = []
+
+def save_data():
+    with open(data_file, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def calculate_pass_status(score):
+    return "Pass" if score > 30 else "Fail"
+
+def insert_data():
+    name = input("Enter Name: ")
+    address = input("Enter Address: ")
+    city = input("Enter City: ")
+    country = input("Enter Country: ")
+    pincode = input("Enter Pincode: ")
+    sat_score = int(input("Enter SAT Score: "))
+    passed = calculate_pass_status(sat_score)
+    
+    record = {
+        "Name": name,
+        "Address": address,
+        "City": city,
+        "Country": country,
+        "Pincode": pincode,
+        "SAT Score": sat_score,
+        "Passed": passed
+    }
+    
+    data.append(record)
+    save_data()
+    print("Data inserted successfully.")
+
+def view_all_data():
+    print(json.dumps(data, indent=4))
+
+def get_rank():
+    name = input("Enter Name: ")
+    sorted_data = sorted(data, key=lambda x: x["SAT Score"], reverse=True)
+    for index, record in enumerate(sorted_data, 1):
+        if record["Name"] == name:
+            print(f"Rank of {name}: {index}")
+            return
+    print(f"No record found for {name}.")
+
+def update_score():
+    name = input("Enter Name: ")
+    for record in data:
+        if record["Name"] == name:
+            new_score = int(input("Enter new SAT Score: "))
+            record["SAT Score"] = new_score
+            record["Passed"] = calculate_pass_status(new_score)
+            save_data()
+            print("Score updated successfully.")
+            return
+    print(f"No record found for {name}.")
+
+def delete_record():
+    name = input("Enter Name: ")
+    global data
+    data = [record for record in data if record["Name"] != name]
+    save_data()
+    print("Record deleted successfully.")
+
+def calculate_average_score():
+    if not data:
+        print("No data available.")
+        return
+    average_score = sum(record["SAT Score"] for record in data) / len(data)
+    print(f"Average SAT Score: {average_score}")
+
+def filter_by_pass_fail():
+    status = input("Enter status to filter (Pass/Fail): ")
+    filtered_data = [record for record in data if record["Passed"] == status]
+    print(json.dumps(filtered_data, indent=4))
+
+def main_menu():
+    while True:
+        print("\nSelect an option:")
+        print("1. Insert data")
+        print("2. View all data")
+        print("3. Get rank")
+        print("4. Update score")
+        print("5. Delete one record")
+        print("6. Calculate Average SAT Score")
+        print("7. Filter records by Pass/Fail Status")
+        print("8. Exit")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            insert_data()
+        elif choice == '2':
+            view_all_data()
+        elif choice == '3':
+            get_rank()
+        elif choice == '4':
+            update_score()
+        elif choice == '5':
+            delete_record()
+        elif choice == '6':
+            calculate_average_score()
+        elif choice == '7':
+            filter_by_pass_fail()
+        elif choice == '8':
+            break
+        else:
+            print("Invalid choice, please try again.")
+
+if __name__ == "__main__":
+    main_menu()
